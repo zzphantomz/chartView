@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { widget } from "./charting_library";
 import Datafeed from "./datafeed_custom";
 import queryString from 'query-string';
-
+let interval;
 const TVChartContainer = () => {
   const chartContainerRef = useRef();
   let vars = {};
@@ -14,6 +14,12 @@ const TVChartContainer = () => {
   const data = queryString.parse(href)
   const id = data.id;
   const theme = data.theme?data.theme:'dark';
+
+  const setReady = () =>{
+    window?.ReactNativeWebView?.postMessage(true);
+    clearInterval(interval)
+  }
+
   useEffect(() => {
     const widgetOptions = {
       symbol: id,
@@ -77,6 +83,15 @@ const TVChartContainer = () => {
 
 
     const tvWidget = new widget(widgetOptions);
+
+
+    interval = setInterval(function () {
+
+      if (tvWidget._ready) {
+        clearInterval(interval)
+          setReady();
+      }
+    }, 500)
 
     // tvWidget.chart().getSeries().setChartStyleProperties(1,{
     //   upColor: '#10F9E0',
